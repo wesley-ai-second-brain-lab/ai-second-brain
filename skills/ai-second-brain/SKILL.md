@@ -81,7 +81,7 @@ await new Promise(r=>setTimeout(r,3500)); document.querySelector('#expand')?.cli
 - `wiki/`：找出 1–4 个相关概念。已有的概念页：加一两条**具体**新要点（说清这份资料对该概念补充了什么，不要照抄 summary）并链接回新 source；没有就新建（一句话定义 + 要点 + 相关）。不要为一个一次性细节建概念页。
 - `index.md`：在资料列表最前面加一行，新概念加进概念列表，更新日期和计数。
 - **写本机副本**：把文件放到 `/mnt/user-data/outputs/brain/...` 后用 device_commit_files 写到 `<local_dir>/...`（覆盖旧版时先 device_stage_files 取 mtime，或确认是自己生成的文件时 force）。**写完马上用 device_bash 核对文件大小和截图行数**；Obsidian 正打开这个文件时可能用旧内容覆盖回去，核对不符就重写一次，并提醒用户在 Obsidian 里关掉再打开这页。
-- **写 Drive**：Google_Drive create_file，`contentMimeType: text/markdown`，`disableConversionToGoogleType: true`，parentId 为对应子文件夹。Drive 工具不能改文件内容：要更新同名文件时，先创建新文件，再把旧文件 trash_file（这是替换，不是删除用户资料）。记下新文件的 `viewUrl`，回复里要用。
+- **写 Drive**：Google_Drive create_file，`contentMimeType: text/markdown`，`disableConversionToGoogleType: true`，parentId 为对应子文件夹。Drive 工具不能改文件内容：要更新 index.md、概念页或同名文件时，先用 download_file_content 读旧版，在本地改好，创建同名新文件，再把旧文件 trash_file（这是替换，不是删除用户资料）。上传文件多时交给一个后台子 Agent 做。记下新 sources 文件的 `viewUrl`，回复里要用。
 - **写网站**（有 `website_url` 时）：ArtifactData set 集合 `library`，doc_id 视频 `yt-<ID>`、文章 `art-<slug>`、PDF `pdf-<slug>`：`{id, type:视频|文章|PDF, title, url, channel(频道或作者/日期), views?, desc(一句话), tags, createdAt(当前毫秒时间戳，保证新条目排在最前), notes, mindmap?, frames?:[{t, url, caption}]}`。不要改 `marks`、`days` 或其他条目。写完用 Artifact open 打开网站。
 
 ## 二、问答
