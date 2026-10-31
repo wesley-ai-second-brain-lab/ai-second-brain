@@ -1,0 +1,9 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+tools/claude-watch/
+*.mp4
+*.webm
+*.m4a
+brain.config.json

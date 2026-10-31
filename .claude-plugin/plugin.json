@@ -1,0 +1,9 @@
+{
+  "name": "ai-second-brain",
+  "version": "1.0.0",
+  "description": "Turn English YouTube/articles/PDFs into Chinese notes, mind maps and slide screenshots in a Karpathy-style second brain (Obsidian + Google Drive), then ask questions about it.",
+  "author": { "name": "zhangdahui01" },
+  "license": "MIT",
+  "repository": "https://github.com/zhangdahui01/ai-second-brain",
+  "keywords": ["second-brain", "obsidian", "youtube", "notes", "karpathy", "llm-wiki"]
+}
