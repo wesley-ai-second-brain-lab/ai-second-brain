@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """AI 第二大脑 · 视频队列处理器（在 Mac 本机由 launchd 运行）。
-第二大脑目录由环境变量 AI_BRAIN_DIR 指定（默认 ~/LLM/AI第二大脑）。
 Claude 往 inbox/queue/ 放 <名字>.url（一行 YouTube/视频链接，可选第二行 "--start 10:00 --end 40:00"）。
 本脚本用开源 claude-watch 的 watch.py 下载视频、按场景截图、取字幕；没有字幕时用本机 mlx-whisper 转写。
 结果写到 inbox/<slug>/，处理完把 .url 改名为 .done（失败为 .failed），日志在 inbox/logs/。"""
 import json, os, re, subprocess, sys, time, glob, shlex
 from pathlib import Path
-BRAIN = Path(os.path.expanduser(os.environ.get("AI_BRAIN_DIR", "~/LLM/AI第二大脑")))
+BRAIN = Path.home() / "LLM" / "AI第二大脑"
 INBOX = BRAIN / "inbox"; QUEUE = INBOX / "queue"; LOGS = INBOX / "logs"
 TOOLS = BRAIN / "tools"; CW = TOOLS / "claude-watch"; VENV = TOOLS / ".venv"
 PY = str(VENV / "bin" / "python3")
@@ -98,8 +97,26 @@ def process(job: Path):
     log(logf, f"done → {libdir}")
     job.rename(job.with_suffix(".done"))
 
+def process_tts(job: Path):
+    """配音任务：queue/<名字>.tts（JSON），只允许读写第二大脑 video/ 目录，调用 tools/tts.py。"""
+    job = job.rename(job.with_suffix(".ttsrun"))
+    spec = json.loads(job.read_text())
+    vroot = (BRAIN / "video").resolve()
+    for k in ("lines_dir", "out_dir"):
+        p = Path(spec[k]).resolve()
+        if p != vroot and vroot not in p.parents:
+            job.rename(job.with_suffix(".ttsfailed")); return
+    with open(LOGS / (job.stem + ".tts.log"), "a") as f:
+        r = subprocess.run([PY, str(TOOLS / "tts.py"), str(job)], capture_output=True, text=True, timeout=5400)
+        f.write(r.stdout[-3000:] + "\n" + r.stderr[-3000:] + f"\nrc={r.returncode}\n")
+    job.rename(job.with_suffix(".ttsdone" if r.returncode == 0 else ".ttsfailed"))
+
 def main():
     QUEUE.mkdir(parents=True, exist_ok=True); LOGS.mkdir(parents=True, exist_ok=True)
+    for tj in sorted(QUEUE.glob("*.tts")):
+        try: process_tts(tj)
+        except Exception as e:
+            with open(LOGS / "runner-errors.log", "a") as f: f.write(f"{time.ctime()} {tj.name}: {e}\n")
     jobs = sorted(QUEUE.glob("*.url"))
     if not jobs: return
     try: ensure_deps()

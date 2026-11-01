@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI Second Brain"
+  short_description: "YouTube/articles/PDFs → Chinese notes, mind maps and slide screenshots in your Obsidian second brain"
+  default_prompt: "Save this video to my second brain: "
+policy:
+  allow_implicit_invocation: true

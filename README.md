@@ -33,18 +33,47 @@ Claude 看截图 + 读转写 ──► 中文笔记 / 脑图 / 8–15 张关键�
 
 ## 目录
 ```
-skills/ai-second-brain/SKILL.md   Claude skill（核心说明书）
+skills/ai-second-brain/SKILL.md   Agent Skill（核心说明书，Claude/Codex/Kiro/Devin 通用）
+.agents/ .claude/ .kiro/           指向上面的符号链接
+AGENTS.md                         给其他 agent 的说明
+tools/brain.py                    通用命令行（init/video/sheets/ingest/site/search）
+tools/install-skill.sh            一键给 Claude Code / Codex / Kiro 安装
 tools/install.sh                  一次性安装（macOS）
-tools/runner.py                   launchd 视频队列处理器
+tools/runner.py                   视频队列处理器（launchd 或 brain video 直接调用）
+tools/tts.py                      可选：本机开源语音（Kokoro）配音
 template/brain/                   第二大脑空模板（README、index、brain.config.example.json）
 site/index.html                   可选：Claude Artifact 网站模板（每日精选、学习笔记、稍后读、收藏、武器库）
 .claude-plugin/plugin.json        Claude Code 插件清单
 ```
 
+## 兼容哪些 AI Agent · Compatibility
+用的是开放的 [Agent Skills](https://agentskills.io) 格式（`SKILL.md`），外加一个只依赖 Python 标准库的命令行工具 `tools/brain.py`，任何能跑 shell 的 agent 都能用：
+
+| Agent | 怎么装 | 读取位置 |
+|---|---|---|
+| Claude 应用（网页/桌面） | 设置 → Skills 上传 `skills/ai-second-brain`（zip） | 通过桌面版连接 Mac |
+| Claude Code | `bash tools/install-skill.sh claude` | `~/.claude/skills/`、仓库 `.claude/skills/` |
+| OpenAI Codex | `bash tools/install-skill.sh codex` | `~/.agents/skills/`、仓库 `.agents/skills/`（含 `agents/openai.yaml`） |
+| Kiro | `bash tools/install-skill.sh kiro` | `~/.kiro/skills/`、仓库 `.kiro/skills/` |
+| Devin | 把本仓库加到 Devin 即可 | 仓库 `.agents/skills/` |
+| 其他（Cursor、Gemini CLI…） | 读仓库根目录 `AGENTS.md` | `AGENTS.md` |
+
+`install-skill.sh` 用符号链接安装（`git pull` 一次全部更新），并装一个 `brain` 命令：
+
+```bash
+brain init                       # 建第二大脑文件夹
+brain video https://youtu.be/…   # 下载 + 场景截图 + 字幕/本机 Whisper
+brain sheets <dir>               # 缩略图总览，挑关键帧
+brain ingest note.json           # 写 raw / sources / wiki / index / 截图，并打印「在哪里看」
+brain site                       # 生成本地网页 site/index.html
+brain search Agent 记忆           # 问答前先找资料
+```
+想要云端副本：把第二大脑文件夹放进 Google Drive for desktop 的同步目录即可。
+
 ## 安装
 ### 1. 本机视频工具（macOS，推荐 Apple 芯片）
 ```bash
-git clone https://github.com/zhangdahui01/ai-second-brain.git
+git clone https://github.com/wesley-ai-second-brain-lab/ai-second-brain.git
 cd ai-second-brain
 bash tools/install.sh                              # 第二大脑默认放在 ~/LLM/AI第二大脑
 # 或者自定义位置：AI_BRAIN_DIR=~/Notes/brain bash tools/install.sh
